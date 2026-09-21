@@ -156,3 +156,153 @@ def test_budget_unique_constraint(db):
     with pytest.raises(IntegrityError):
         db.commit()
     db.rollback()
+
+def test_budget_negative_amount_constraint(db):
+    user = User(username="budgneguser", email="budgneg@example.com", password_hash="hash")
+    db.add(user)
+    db.commit()
+
+    category = Category(user_id=user.id, name="Entertainment2", type=CategoryType.EXPENSE)
+    db.add(category)
+    db.commit()
+
+    budget = Budget(
+        user_id=user.id,
+        category_id=category.id,
+        amount=-50.0,
+        month=10,
+        year=2023
+    )
+    db.add(budget)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+def test_budget_month_bounds(db):
+    user = User(username="budgmonthuser", email="budgmonth@example.com", password_hash="hash")
+    db.add(user)
+    db.commit()
+
+    category = Category(user_id=user.id, name="Books", type=CategoryType.EXPENSE)
+    db.add(category)
+    db.commit()
+
+    # Test lower bound
+    budget_low = Budget(
+        user_id=user.id,
+        category_id=category.id,
+        amount=100.0,
+        month=0,
+        year=2023
+    )
+    db.add(budget_low)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+    # Test upper bound
+    budget_high = Budget(
+        user_id=user.id,
+        category_id=category.id,
+        amount=100.0,
+        month=13,
+        year=2023
+    )
+    db.add(budget_high)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+def test_user_cascade_deletion(db):
+    user = User(username="cascadeuser", email="cascade@example.com", password_hash="hash")
+    db.add(user)
+    db.commit()
+
+    category = Category(user_id=user.id, name="CascadeCat", type=CategoryType.EXPENSE)
+    db.add(category)
+    db.commit()
+
+    budget = Budget(user_id=user.id, category_id=category.id, amount=100.0, month=10, year=2023)
+    db.add(budget)
+    db.commit()
+
+    transaction = Transaction(
+        user_id=user.id,
+        date=date(2023, 10, 1),
+        category_id=category.id,
+        amount=50.0,
+        transaction_type=TransactionType.EXPENSE
+    )
+    db.add(transaction)
+    db.commit()
+
+    user_id = user.id
+    category_id = category.id
+    budget_id = budget.id
+    transaction_id = transaction.id
+
+    # Delete the user
+    db.delete(user)
+    db.commit()
+
+    # Verify everything related is deleted
+    assert db.query(User).filter(User.id == user_id).first() is None
+    assert db.query(Category).filter(Category.id == category_id).first() is None
+    assert db.query(Budget).filter(Budget.id == budget_id).first() is None
+    assert db.query(Transaction).filter(Transaction.id == transaction_id).first() is None
+
+def test_category_foreign_key_restriction(db):
+    user = User(username="catfkuser", email="catfk@example.com", password_hash="hash")
+    db.add(user)
+    db.commit()
+
+    category = Category(user_id=user.id, name="CatFK", type=CategoryType.EXPENSE)
+    db.add(category)
+    db.commit()
+
+    transaction = Transaction(
+        user_id=user.id,
+        date=date(2023, 10, 1),
+        category_id=category.id,
+        amount=50.0,
+        transaction_type=TransactionType.EXPENSE
+    )
+    db.add(transaction)
+    db.commit()
+
+    # Try to delete the category which is referenced by a transaction
+    db.delete(category)
+    with pytest.raises(IntegrityError):
+        db.commit()
+    db.rollback()
+
+def test_payment_method_foreign_key_restriction(db):
+    user = User(username="pmfkuser", email="pmfk@example.com", password_hash="hash")
+    db.add(user)
+    db.commit()
+
+    category = Category(user_id=user.id, name="PMFKCat", type=CategoryType.EXPENSE)
+    db.add(category)
+    db.commit()
+
+    payment_method = db.query(PaymentMethod).filter(PaymentMethod.name == "Cash").first()
+
+    transaction = Transaction(
+        user_id=user.id,
+        date=date(2023, 10, 1),
+        category_id=category.id,
+        amount=50.0,
+        transaction_type=TransactionType.EXPENSE,
+        payment_method_id=payment_method.id
+    )
+    db.add(transaction)
+    db.commit()
+
+    # Try to delete the payment method which is referenced by a transaction
+    # Since payment_method_id is nullable, the ORM might try to set it to NULL instead of deleting it.
+    # To test the DB-level RESTRICT constraint, we can execute a delete statement directly.
+    from sqlalchemy import delete
+    with pytest.raises(IntegrityError):
+        db.execute(delete(PaymentMethod).where(PaymentMethod.id == payment_method.id))
+        db.commit()
+    db.rollback()
