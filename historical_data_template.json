@@ -1,0 +1,58 @@
+{
+    "users": [
+        {
+            "username": "example_user",
+            "email": "user@example.com",
+            "password_hash": "placeholder_hash_value"
+        }
+    ],
+    "categories": [
+        {
+            "username": "example_user",
+            "name": "Groceries",
+            "type": "EXPENSE"
+        },
+        {
+            "username": "example_user",
+            "name": "Salary",
+            "type": "INCOME"
+        }
+    ],
+    "payment_methods": [
+        {
+            "name": "Credit Card"
+        },
+        {
+            "name": "Bank Transfer"
+        }
+    ],
+    "budgets": [
+        {
+            "username": "example_user",
+            "category_name": "Groceries",
+            "amount": 500.0,
+            "month": 10,
+            "year": 2023
+        }
+    ],
+    "transactions": [
+        {
+            "username": "example_user",
+            "category_name": "Groceries",
+            "payment_method_name": "Credit Card",
+            "date": "2023-10-15",
+            "amount": 50.5,
+            "transaction_type": "EXPENSE",
+            "description": "Supermarket purchase",
+            "notes": "Weekly groceries"
+        },
+        {
+            "username": "example_user",
+            "category_name": "Salary",
+            "date": "2023-10-01",
+            "amount": 5000.0,
+            "transaction_type": "INCOME",
+            "description": "October Salary"
+        }
+    ]
+}
