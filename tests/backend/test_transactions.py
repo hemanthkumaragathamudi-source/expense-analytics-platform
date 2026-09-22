@@ -5,23 +5,30 @@ from app.models.models import User, Category, PaymentMethod, CategoryType, Trans
 from app.core.database import Base
 
 from app.core.database import get_db
+from app.api.deps import get_current_user
 
 @pytest.fixture(scope="function")
-def client_with_db(db):
-    def override_get_db():
-        yield db
-    app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
-    app.dependency_overrides.clear()
-
-@pytest.fixture(scope="function")
-def setup_data(db):
+def test_user(db):
     user = User(username="testuser", email="test@example.com", password_hash="hash")
     db.add(user)
     db.commit()
     db.refresh(user)
+    return user
 
-    category = Category(user_id=user.id, name="Food", type=CategoryType.EXPENSE)
+@pytest.fixture(scope="function")
+def client_with_db(db, test_user):
+    def override_get_db():
+        yield db
+    def override_get_current_user():
+        return test_user
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    yield TestClient(app)
+    app.dependency_overrides.clear()
+
+@pytest.fixture(scope="function")
+def setup_data(db, test_user):
+    category = Category(user_id=test_user.id, name="Food", type=CategoryType.EXPENSE)
     db.add(category)
     db.commit()
     db.refresh(category)
@@ -29,7 +36,7 @@ def setup_data(db):
     payment_method = db.query(PaymentMethod).first()
 
     return {
-        "user_id": user.id,
+        "user_id": test_user.id,
         "category_id": category.id,
         "payment_method_id": payment_method.id
     }
@@ -124,8 +131,8 @@ def test_create_transaction_invalid_user(client_with_db, setup_data):
         "date": "2023-10-01",
         "transaction_type": "EXPENSE"
     })
-    assert response.status_code == 404
-    assert response.json()["detail"] == "User not found"
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Not authorized to create transaction for another user"
 
 def test_list_transactions(client_with_db, setup_data):
     # Create some transactions

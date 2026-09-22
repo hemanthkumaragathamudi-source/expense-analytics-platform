@@ -9,11 +9,19 @@ from typing import Optional
 
 from app.models.models import TransactionType
 from app.schemas.transaction import TransactionCreate, TransactionResponse, TransactionUpdate
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
 @router.post("/", response_model=TransactionResponse, status_code=status.HTTP_201_CREATED)
-def create_transaction(transaction: TransactionCreate, db: Session = Depends(get_db)):
+def create_transaction(
+    transaction: TransactionCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if transaction.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to create transaction for another user")
+
     # Check if user exists
     user = db.query(User).filter(User.id == transaction.user_id).first()
     if not user:
@@ -41,8 +49,12 @@ def create_transaction(transaction: TransactionCreate, db: Session = Depends(get
     return db_transaction
 
 @router.get("/{transaction_id}", response_model=TransactionResponse)
-def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+def get_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    transaction = db.query(Transaction).filter(Transaction.id == transaction_id, Transaction.user_id == current_user.id).first()
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return transaction
@@ -54,12 +66,13 @@ def list_transactions(
     transaction_type: Optional[TransactionType] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Transaction)
+    query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
 
-    if user_id is not None:
-        query = query.filter(Transaction.user_id == user_id)
+    if user_id is not None and user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to access transactions of another user")
     if category_id is not None:
         query = query.filter(Transaction.category_id == category_id)
     if transaction_type is not None:
@@ -73,8 +86,13 @@ def list_transactions(
     return query.all()
 
 @router.put("/{transaction_id}", response_model=TransactionResponse)
-def update_transaction(transaction_id: int, transaction_update: TransactionUpdate, db: Session = Depends(get_db)):
-    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+def update_transaction(
+    transaction_id: int,
+    transaction_update: TransactionUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id, Transaction.user_id == current_user.id).first()
     if not db_transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
 
@@ -98,8 +116,12 @@ def update_transaction(transaction_id: int, transaction_update: TransactionUpdat
     return db_transaction
 
 @router.delete("/{transaction_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+def delete_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id, Transaction.user_id == current_user.id).first()
     if not db_transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
 

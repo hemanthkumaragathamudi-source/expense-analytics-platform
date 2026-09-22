@@ -1,3 +1,8 @@
+import os
+
+# Set dummy secret key for testing before any app imports
+os.environ["SECRET_KEY"] = "test-secret-key-12345678901234567890123456789012"
+
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
