@@ -41,8 +41,12 @@ def client():
 @pytest.fixture
 def authorized_client(db, test_user):
     from app.core.database import get_db
-    app.dependency_overrides[get_db] = lambda: db
-    app.dependency_overrides[get_current_user] = lambda: test_user
+    def override_get_db():
+        yield db
+    def override_get_current_user():
+        return test_user
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
     yield TestClient(app)
     app.dependency_overrides.clear()
 
@@ -247,3 +251,68 @@ def test_delete_other_user_budget(authorized_client, db, other_user):
 def test_delete_nonexistent_budget(authorized_client):
     response = authorized_client.delete("/api/budgets/9999")
     assert response.status_code == 404
+
+
+def test_create_budget_zero_amount(authorized_client, db, test_user):
+    category = create_test_category(db, test_user.id)
+    payload = {
+        "category_id": category.id,
+        "amount": 0.0,
+        "month": 5,
+        "year": 2024
+    }
+    response = authorized_client.post("/api/budgets/", json=payload)
+    assert response.status_code == 422
+
+def test_update_budget_zero_amount(authorized_client, db, test_user):
+    category = create_test_category(db, test_user.id)
+    budget = create_test_budget(db, test_user.id, category.id, 100.0, 1, 2024)
+    payload = {
+        "amount": 0.0
+    }
+    response = authorized_client.put(f"/api/budgets/{budget.id}", json=payload)
+    assert response.status_code == 422
+
+def test_create_budget_invalid_year_too_large(authorized_client, db, test_user):
+    category = create_test_category(db, test_user.id)
+    payload = {
+        "category_id": category.id,
+        "amount": 100.0,
+        "month": 5,
+        "year": 10000
+    }
+    response = authorized_client.post("/api/budgets/", json=payload)
+    assert response.status_code == 422
+
+def test_update_budget_invalid_year_too_large(authorized_client, db, test_user):
+    category = create_test_category(db, test_user.id)
+    budget = create_test_budget(db, test_user.id, category.id, 100.0, 1, 2024)
+    payload = {
+        "year": 10000
+    }
+    response = authorized_client.put(f"/api/budgets/{budget.id}", json=payload)
+    assert response.status_code == 422
+
+def test_create_budget_global_category_rejected(authorized_client, db, test_user):
+    # A category with user_id=None
+    category = create_test_category(db, None, "Global Category")
+    payload = {
+        "category_id": category.id,
+        "amount": 100.0,
+        "month": 5,
+        "year": 2024
+    }
+    response = authorized_client.post("/api/budgets/", json=payload)
+    assert response.status_code == 403
+
+def test_update_budget_global_category_rejected(authorized_client, db, test_user):
+    category = create_test_category(db, test_user.id)
+    budget = create_test_budget(db, test_user.id, category.id, 100.0, 1, 2024)
+
+    global_category = create_test_category(db, None, "Global Category")
+
+    payload = {
+        "category_id": global_category.id
+    }
+    response = authorized_client.put(f"/api/budgets/{budget.id}", json=payload)
+    assert response.status_code == 403

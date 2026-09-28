@@ -15,13 +15,12 @@ def create_budget(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # Verify category exists and belongs to the user or is a global category (if applicable)
-    # The instructions say: "Verify that the category belongs to the authenticated user. Prevent a user from creating a budget using another user's category."
+    # Verify category exists and belongs to the user. Global categories are not supported based on Categories API logic.
     category = db.query(Category).filter(Category.id == budget.category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
 
-    if category.user_id is not None and category.user_id != current_user.id:
+    if category.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to use this category")
 
     # Verify uniqueness: user_id, category_id, month, year
@@ -91,7 +90,7 @@ def update_budget(
         category = db.query(Category).filter(Category.id == update_data["category_id"]).first()
         if not category:
             raise HTTPException(status_code=404, detail="Category not found")
-        if category.user_id is not None and category.user_id != current_user.id:
+        if category.user_id != current_user.id:
             raise HTTPException(status_code=403, detail="Not authorized to use this category")
 
     # Check uniqueness if category_id, month, or year are being updated
