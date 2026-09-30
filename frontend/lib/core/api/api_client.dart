@@ -10,7 +10,7 @@ class ApiClient {
   ApiClient({
     http.Client? client,
     TokenStorage? tokenStorage,
-    this.baseUrl = 'http://localhost:8000',
+    this.baseUrl = const String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:8000'),
   })  : _client = client ?? http.Client(),
         _tokenStorage = tokenStorage ?? TokenStorage();
 
