@@ -11,8 +11,6 @@ class CategoryType(str, enum.Enum):
 class TransactionType(str, enum.Enum):
     EXPENSE = "EXPENSE"
     INCOME = "INCOME"
-    RETURN = "RETURN"
-    SAVING = "SAVING"
 
 class User(Base):
     __tablename__ = "users"
