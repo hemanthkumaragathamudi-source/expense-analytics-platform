@@ -44,7 +44,10 @@ def get_dashboard_data(db: Session, user_id: int, month: int, year: int) -> Dash
     spending_list = []
     if category_totals:
         category_ids = list(category_totals.keys())
-        categories = db.query(Category).filter(Category.id.in_(category_ids)).all()
+        categories = db.query(Category).filter(
+            Category.id.in_(category_ids),
+            Category.user_id == user_id
+        ).all()
         category_map = {c.id: c.name for c in categories}
 
         for cat_id, amount in category_totals.items():
@@ -98,7 +101,10 @@ def get_dashboard_data(db: Session, user_id: int, month: int, year: int) -> Dash
     # Pre-resolve category names for recent transactions to avoid N+1 issues
     recent_category_ids = list(set(t.category_id for t in recent_txs))
     if recent_category_ids:
-        recent_categories = db.query(Category).filter(Category.id.in_(recent_category_ids)).all()
+        recent_categories = db.query(Category).filter(
+            Category.id.in_(recent_category_ids),
+            Category.user_id == user_id
+        ).all()
         recent_category_map = {c.id: c.name for c in recent_categories}
     else:
         recent_category_map = {}

@@ -220,3 +220,38 @@ def test_dashboard_budget_only(db, client_with_db, test_user):
     assert data["insight"]["type"] == "budget_status"
     assert "within budget" in data["insight"]["title"].lower()
     assert "4,000" in data["insight"]["description"]
+
+
+def test_dashboard_category_ownership_isolation(db, client_with_db, test_user, other_user):
+    # test_user has a category
+    test_cat = Category(user_id=test_user.id, name="Test User Cat", type=CategoryType.EXPENSE)
+    # other_user has a category
+    other_cat = Category(user_id=other_user.id, name="Other User Cat", type=CategoryType.EXPENSE)
+    db.add_all([test_cat, other_cat])
+    db.commit()
+
+    # Create a transaction for test_user, using test_cat
+    tx1 = Transaction(user_id=test_user.id, date=date(2026, 12, 1), category_id=test_cat.id, amount=100.0, transaction_type=TransactionType.EXPENSE)
+
+    # Intentionally create a weird state where test_user has a transaction pointing to other_user's category
+    # to prove the dashboard will not leak the category name.
+    tx2 = Transaction(user_id=test_user.id, date=date(2026, 12, 2), category_id=other_cat.id, amount=200.0, transaction_type=TransactionType.EXPENSE)
+
+    db.add_all([tx1, tx2])
+    db.commit()
+
+    response = client_with_db.get("/api/dashboard/?month=12&year=2026")
+    assert response.status_code == 200
+    data = response.json()
+
+    # The first transaction should have resolved category name
+    assert any(c["category_name"] == "Test User Cat" for c in data["spending_by_category"])
+
+    # The second transaction points to another user's category, so it should not be able to resolve its name
+    assert not any(c["category_name"] == "Other User Cat" for c in data["spending_by_category"])
+    assert any(c["category_name"] == "Unknown" for c in data["spending_by_category"])
+
+    # Check recent transactions
+    assert any(t["category_name"] == "Test User Cat" for t in data["recent_transactions"])
+    assert not any(t["category_name"] == "Other User Cat" for t in data["recent_transactions"])
+    assert any(t["category_name"] == "Unknown" for t in data["recent_transactions"])
