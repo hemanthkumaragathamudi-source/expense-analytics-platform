@@ -5,6 +5,7 @@ from app.api.endpoints import auth
 from app.api.endpoints import categories
 from app.api.endpoints import payment_methods
 from app.api.endpoints import budgets
+from app.api.endpoints import dashboard
 
 app = FastAPI(title="Personal Finance & Expense Analytics Platform API")
 
@@ -14,3 +15,4 @@ app.include_router(categories.router, prefix="/api/categories", tags=["Categorie
 app.include_router(payment_methods.router, prefix="/api/payment-methods", tags=["Payment Methods"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["Transactions"])
 app.include_router(budgets.router, prefix="/api/budgets", tags=["Budgets"])
+app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
