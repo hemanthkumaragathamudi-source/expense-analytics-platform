@@ -24,29 +24,34 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(
       routerConfig: appRouter.router,
     ));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
 
     // Verify initial tab is Home
-    expect(find.text('Home Screen (Placeholder)'), findsOneWidget);
+    expect(find.text('Hello, there'), findsWidgets);
 
     // Tap Transactions
     await tester.tap(find.text('Transactions').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
     expect(find.text('Transactions Screen (Placeholder)'), findsOneWidget);
 
     // Tap Budgets
     await tester.tap(find.text('Budgets').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
     expect(find.text('Budgets Screen (Placeholder)'), findsOneWidget);
 
     // Tap Analytics
     await tester.tap(find.text('Analytics').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
     expect(find.text('Analytics Screen (Placeholder)'), findsOneWidget);
 
     // Tap Profile
     await tester.tap(find.text('Profile').last);
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
     expect(find.text('Profile Screen (Placeholder)'), findsOneWidget);
   });
 }

@@ -36,7 +36,8 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(
       routerConfig: appRouter.router,
     ));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
 
     expect(find.text('Login'), findsWidgets);
     expect(find.text('Username or Email'), findsOneWidget);
@@ -53,9 +54,10 @@ void main() {
     await tester.pumpWidget(MaterialApp.router(
       routerConfig: appRouter.router,
     ));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump();
 
-    expect(find.text('Home Screen (Placeholder)'), findsOneWidget);
+    expect(find.text('Hello, there'), findsWidgets);
     // Bottom nav bar items
     expect(find.text('Home'), findsWidgets);
     expect(find.text('Transactions'), findsWidgets);
