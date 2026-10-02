@@ -7,6 +7,8 @@ import '../features/auth/register_screen.dart';
 import '../features/shell/main_shell.dart';
 import '../features/home/home_screen.dart';
 import '../features/transactions/transactions_screen.dart';
+import '../features/transactions/transaction_form_screen.dart';
+import '../features/transactions/models/transaction.dart';
 import '../features/budgets/budgets_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/profile/profile_screen.dart';
@@ -77,6 +79,22 @@ class AppRouter {
               GoRoute(
                 path: '/transactions',
                 builder: (context, state) => const TransactionsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    builder: (context, state) => TransactionFormScreen(authState: authState),
+                  ),
+                  GoRoute(
+                    path: ':id/edit',
+                    builder: (context, state) {
+                      final transaction = state.extra as Transaction?;
+                      return TransactionFormScreen(
+                        authState: authState,
+                        transaction: transaction,
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
