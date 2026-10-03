@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
 import 'package:etracker/core/api/api_client.dart';
 import 'package:etracker/features/categories/repositories/categories_repository.dart';
-import 'package:etracker/features/categories/models/category.dart';
 
 class MockApiClient extends Mock implements ApiClient {}
 

@@ -119,7 +119,7 @@ class _CategoryFormModalState extends State<CategoryFormModal> {
             ),
             AppSpacing.gapMd,
             DropdownButtonFormField<String>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: const InputDecoration(
                 labelText: 'Type',
                 border: OutlineInputBorder(),
