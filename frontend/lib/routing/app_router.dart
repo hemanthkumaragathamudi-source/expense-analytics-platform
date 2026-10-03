@@ -12,6 +12,7 @@ import '../features/transactions/models/transaction.dart';
 import '../features/budgets/budgets_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/categories/categories_screen.dart';
 
 class AppRouter {
   final AuthState authState;
@@ -119,6 +120,12 @@ class AppRouter {
               GoRoute(
                 path: '/profile',
                 builder: (context, state) => ProfileScreen(authState: authState),
+                routes: [
+                  GoRoute(
+                    path: 'categories',
+                    builder: (context, state) => const CategoriesScreen(),
+                  ),
+                ],
               ),
             ],
           ),
