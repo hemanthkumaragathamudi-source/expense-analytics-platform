@@ -34,24 +34,24 @@ void main() {
     await tester.tap(find.text('Transactions').last);
     await tester.pump();
     await tester.pump();
-    expect(find.text('Transactions Screen (Placeholder)'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Transactions'), findsOneWidget);
 
     // Tap Budgets
     await tester.tap(find.text('Budgets').last);
     await tester.pump();
     await tester.pump();
-    expect(find.text('Budgets Screen (Placeholder)'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Budgets'), findsOneWidget);
 
     // Tap Analytics
     await tester.tap(find.text('Analytics').last);
     await tester.pump();
     await tester.pump();
-    expect(find.text('Analytics Screen (Placeholder)'), findsOneWidget);
+    expect(find.widgetWithText(AppBar, 'Analytics'), findsOneWidget);
 
     // Tap Profile
     await tester.tap(find.text('Profile').last);
     await tester.pump();
     await tester.pump();
-    expect(find.text('Profile Screen (Placeholder)'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget); // Found in the new ProfileScreen
   });
 }
