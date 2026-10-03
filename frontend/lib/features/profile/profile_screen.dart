@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_card.dart';
@@ -106,6 +107,15 @@ class ProfileScreen extends StatelessWidget {
               padding: EdgeInsets.zero,
               child: Column(
                 children: [
+                  ListTile(
+                    leading: const Icon(Icons.category_outlined),
+                    title: const Text('Categories Management'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.go('/profile/categories');
+                    },
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined),
                     title: const Text('Preferences'),
