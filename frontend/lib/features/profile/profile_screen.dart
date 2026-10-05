@@ -108,29 +108,11 @@ class ProfileScreen extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.category_outlined),
-                    title: const Text('Categories Management'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      context.go('/profile/categories');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.payment_outlined),
-                    title: const Text('Payment Methods'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      context.go('/profile/payment-methods');
-                    },
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
                     leading: const Icon(Icons.settings_outlined),
-                    title: const Text('Preferences'),
+                    title: const Text('Settings'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
-                      // To be implemented in future
+                      context.go('/profile/settings');
                     },
                   ),
                 ],

@@ -84,7 +84,7 @@ void main() {
     expect(find.text('Not set'), findsNWidgets(3));
   });
 
-  testWidgets('renders Categories Management navigation tile', (WidgetTester tester) async {
+  testWidgets('renders Settings navigation tile', (WidgetTester tester) async {
     mockAuthRepository.mockUser = User(id: 42, username: 'johndoe', email: 'john.doe@example.com');
     final authState = AuthState(authRepository: mockAuthRepository);
     await authState.checkAuthentication();
@@ -92,8 +92,8 @@ void main() {
     await tester.pumpWidget(createWidgetUnderTest(authState));
     await tester.pumpAndSettle();
 
-    final categoriesTile = find.widgetWithText(ListTile, 'Categories Management');
-    expect(categoriesTile, findsOneWidget);
+    final settingsTile = find.widgetWithText(ListTile, 'Settings');
+    expect(settingsTile, findsOneWidget);
   });
 
   testWidgets('Logout interaction and expected logout behavior', (WidgetTester tester) async {
