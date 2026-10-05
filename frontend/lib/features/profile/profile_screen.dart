@@ -117,6 +117,15 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const Divider(height: 1),
                   ListTile(
+                    leading: const Icon(Icons.payment_outlined),
+                    title: const Text('Payment Methods'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      context.go('/profile/payment-methods');
+                    },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
                     leading: const Icon(Icons.settings_outlined),
                     title: const Text('Preferences'),
                     trailing: const Icon(Icons.chevron_right),

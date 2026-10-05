@@ -13,6 +13,7 @@ import '../features/budgets/budgets_screen.dart';
 import '../features/analytics/analytics_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/categories/categories_screen.dart';
+import '../features/payment_methods/payment_methods_screen.dart';
 
 class AppRouter {
   final AuthState authState;
@@ -124,6 +125,10 @@ class AppRouter {
                   GoRoute(
                     path: 'categories',
                     builder: (context, state) => const CategoriesScreen(),
+                  ),
+                  GoRoute(
+                    path: 'payment-methods',
+                    builder: (context, state) => const PaymentMethodsScreen(),
                   ),
                 ],
               ),
