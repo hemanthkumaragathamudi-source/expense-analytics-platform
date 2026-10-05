@@ -52,6 +52,6 @@ void main() {
     await tester.tap(find.text('Profile').last);
     await tester.pump();
     await tester.pump();
-    expect(find.text('Settings'), findsOneWidget); // Found in the new ProfileScreen
+    expect(find.text('Settings').first, findsOneWidget); // Found in the new ProfileScreen
   });
 }
