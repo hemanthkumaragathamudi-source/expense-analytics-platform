@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:etracker/features/payment_methods/models/payment_method.dart';
-import 'package:etracker/features/payment_methods/payment_methods_state.dart';
 import 'package:etracker/features/payment_methods/payment_methods_screen.dart';
 
 // Since the screen creates the state internally, we will test the widget visually.
